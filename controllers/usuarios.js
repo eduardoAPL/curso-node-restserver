@@ -1,27 +1,78 @@
 
-const { response } = require('express');
+const { response, request } = require('express');
+const bcryptjs = require('bcryptjs');
 
-const usuariosGet = (req, res = response) => {
+const Usuario = require('../models/usuario');
+
+const usuariosGet = async (req = request, res = response) => {
+    
+    const { limite = 5, desde = 0 } = req.query;
+    const query = { estado: true };
+
+    const usuarios = await Usuario.find( query )
+                    .limit(Number(limite))
+                    .skip(Number(desde));
+
+    const total = await Usuario.countDocuments( query );
+    
+    /* Para una mayor eficiencia:
+        const { usuarios, total } = await Promise.all([
+            Usuario.find( query ).limit(Number(limite)).skip(Number(desde)),
+            Usuario.countDocuments( query )
+        ]) 
+    */
+
     res.json({
-        msg: 'get API'
+        total,
+        usuarios
     });
 }
 
-const usuariosPut = (req, res = response) => {
+const usuariosPut = async (req = request, res = response) => {
+    
+    const { id } = req.params;
+    const { _id, password, google, correo, ...resto } = req.body;
+
+    if ( password ) {
+       const salt = bcryptjs.genSaltSync();
+       resto.password = bcryptjs.hashSync(password, salt); 
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate( id, resto );
+
     res.json({
-        msg: 'put API'
+        msg: 'put API',
+        usuario
     });
 }
 
-const usuariosPost = (req, res = response) => {
+const usuariosPost = async (req = request, res = response) => {
+    const { nombre, correo, password, rol } = req.body;
+    const usuario = new Usuario( {nobre, correo, password, rol} );
+
+    // Encriptar la contraseña
+    const salt = bcryptjs.genSaltSync();
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+    // Guardar en BD
+    await usuario.save();
+
     res.json({
-        msg: 'post API'
+        msg: 'post API',
+        usuario
     });
 }
 
-const usuariosDelete = (req, res = response) => {
+const usuariosDelete = async (req = request, res = response) => {
+    
+    const { id } = req.params;
+
+    // const usuario = await Usuario.findByIdAndDelete( id );
+    const usuario = await Usuario.findByIdAndUpdate( id, {estado: false} );
+
     res.json({
-        msg: 'delete API'
+        msg: 'delete API',
+        usuario
     });
 }
 
