@@ -1,4 +1,6 @@
 
+const res = require('express/lib/response');
+const Categoria = require('../models/categoria');
 const Role = require('../models/role');
 const Usuario = require('../models/usuario');
 
@@ -23,8 +25,16 @@ const existeUsuarioPorId = async( id ) => {
     }
 } 
 
+const existeCategoriaPorId = async( id ) => {
+    const exist = await Categoria.findById( id );
+    if ( !exist ) {
+        throw new Error(`El id no se encuentra registrado`);
+    }
+}
+
 module.exports = {
     emailExiste,
     existeUsuarioPorId,
-    rolValido
+    rolValido,
+    existeCategoriaPorId
 }

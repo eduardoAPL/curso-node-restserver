@@ -31,7 +31,7 @@ const usuariosGet = async (req = request, res = response) => {
 const usuariosPut = async (req = request, res = response) => {
     
     const { id } = req.params;
-    const { _id, password, google, correo, ...resto } = req.body;
+    const { uid, password, google, correo, ...resto } = req.body;
 
     if ( password ) {
        const salt = bcryptjs.genSaltSync();
@@ -48,7 +48,7 @@ const usuariosPut = async (req = request, res = response) => {
 
 const usuariosPost = async (req = request, res = response) => {
     const { nombre, correo, password, rol } = req.body;
-    const usuario = new Usuario( {nobre, correo, password, rol} );
+    const usuario = new Usuario( {nombre, correo, password, rol} );
 
     // Encriptar la contraseña
     const salt = bcryptjs.genSaltSync();
@@ -63,16 +63,19 @@ const usuariosPost = async (req = request, res = response) => {
     });
 }
 
-const usuariosDelete = async (req = request, res = response) => {
+const usuariosDelete = async (req, res = response) => {
     
     const { id } = req.params;
-
+    
     // const usuario = await Usuario.findByIdAndDelete( id );
     const usuario = await Usuario.findByIdAndUpdate( id, {estado: false} );
 
+    const usuarioAutenticado = req.usuario;
+
     res.json({
         msg: 'delete API',
-        usuario
+        usuario,
+        usuarioAutenticado
     });
 }
 
